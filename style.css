@@ -250,31 +250,55 @@ body {
   align-items: start;
 }
 
-.name-cn {
-  font-size: 1.0625rem;        /* 17px */
-  font-weight: 300;
-  letter-spacing: normal;
-  line-height: 1.5;
-  display: inline-flex;
+.identity {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
 }
-.name-cn .surname { margin-right: .7em; }
-.name-cn .given { letter-spacing: .16em; }
-.name-en {
-  margin-top: 8px;
-  font-size: .6875rem;
-  letter-spacing: .3em;
-  color: var(--gray);
-}
-.contact { margin-top: 26px; }
-.contact a {
-  font-size: .6875rem;
-  letter-spacing: .18em;
+.identity-name {
+  font-size: .6875rem;         /* 11px */
+  letter-spacing: .22em;
   color: var(--ink-soft);
+}
+.identity-mail {
+  font-size: .625rem;          /* 10px */
+  letter-spacing: .1em;
+  color: var(--gray);
   border-bottom: 1px solid var(--line);
-  padding-bottom: 3px;
+  padding-bottom: 2px;
   transition: border-color 400ms var(--ease), color 400ms var(--ease);
 }
-.contact a:hover { color: var(--ink); border-color: var(--ink); }
+.identity-mail:hover { color: var(--ink); border-color: var(--ink); }
+
+.heart-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+}
+.heart-icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--gray-light);
+  stroke-width: 1.3;
+  transition: stroke 400ms var(--ease);
+}
+.heart-btn:hover .heart-icon { stroke: var(--gray); }
+.heart-btn.is-liked .heart-icon {
+  fill: #c9776b;
+  stroke: #c9776b;
+  animation: heartPop 620ms var(--ease);
+}
+@keyframes heartPop {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.4); }
+  55%  { transform: scale(.9); }
+  100% { transform: scale(1); }
+}
 
 .bio li {
   display: flex;
@@ -308,16 +332,92 @@ body {
    FOOTER
    ========================================================================== */
 .site-foot {
-  display: flex;
-  justify-content: space-between;
   padding: 26px var(--pad) 34px;
   border-top: 1px solid var(--line);
+}
+.foot-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: .625rem;
   letter-spacing: .24em;
   color: var(--gray-light);
 }
-.site-foot a { transition: color 400ms var(--ease); }
-.site-foot a:hover { color: var(--ink-soft); }
+.contact-toggle {
+  font-size: .625rem;
+  letter-spacing: .3em;
+  color: var(--gray);
+  padding: 10px;
+  margin: -10px;
+  transition: color 400ms var(--ease);
+}
+.contact-toggle:hover { color: var(--ink); }
+
+.contact-panel {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transition: max-height 600ms var(--ease), opacity 400ms var(--ease), visibility 0s linear 600ms;
+}
+.contact-panel.is-open {
+  max-height: 420px;
+  opacity: 1;
+  visibility: visible;
+  transition: max-height 600ms var(--ease), opacity 500ms var(--ease) 80ms, visibility 0s;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 420px;
+  margin-top: 28px;
+}
+.contact-memo,
+.contact-visitor {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  font-family: var(--font);
+  font-size: .75rem;
+  letter-spacing: .06em;
+  color: var(--ink);
+  padding: 8px 2px;
+  transition: border-color 400ms var(--ease);
+}
+.contact-memo { resize: vertical; min-height: 64px; line-height: 1.9; }
+.contact-memo:focus,
+.contact-visitor:focus { outline: none; border-color: var(--ink); }
+.contact-memo::placeholder,
+.contact-visitor::placeholder {
+  color: var(--gray-light);
+  letter-spacing: .22em;
+  font-size: .625rem;
+  text-transform: uppercase;
+}
+
+.contact-actions { display: flex; align-items: center; gap: 18px; }
+.send-btn {
+  font-size: .625rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border: 1px solid var(--line-strong);
+  padding: 10px 24px;
+  transition: border-color 400ms var(--ease), color 400ms var(--ease);
+}
+.send-btn:hover { border-color: var(--ink); color: var(--ink); }
+.send-btn:disabled { opacity: .5; }
+.send-status {
+  font-size: .5625rem;
+  letter-spacing: .22em;
+  color: var(--gray);
+  opacity: 0;
+  transition: opacity 400ms var(--ease);
+}
+.send-status.is-visible { opacity: 1; }
 
 /* ==========================================================================
    PROJECT PAGE

@@ -118,12 +118,15 @@
       <div class="profile-grid">
 
         <div class="col col-name">
-          <p class="label">STUDENT OF ARCHITECTURE</p>
-          <h1 class="name-cn"><span class="surname">李</span><span class="given">心樣</span></h1>
-          <p class="name-en">LEE SINYANG</p>
-          <p class="contact">
-            <a href="mailto:young6968owo@gmail.com">young6968owo@gmail.com</a>
-          </p>
+          <div class="identity">
+            <span class="identity-name">李心樣</span>
+            <a class="identity-mail" href="mailto:young6968owo@gmail.com">young6968owo@gmail.com</a>
+            <button class="heart-btn" id="heartBtn" type="button" aria-label="Like this portfolio">
+              <svg class="heart-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 20.3c-.3 0-.6-.1-.8-.3C7.9 17.3 3 13.4 3 8.9 3 6.2 5.1 4 7.8 4c1.6 0 3.1.8 4.2 2.1C13.1 4.8 14.6 4 16.2 4 18.9 4 21 6.2 21 8.9c0 4.5-4.9 8.4-8.2 11.1-.2.2-.5.3-.8.3z"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="col col-bio">
@@ -152,8 +155,21 @@
   </main>
 
   <footer class="site-foot">
-    <span>© 2025 LEE SINYANG</span>
-    <span class="foot-right"><a href="mailto:young6968owo@gmail.com">young6968owo@gmail.com</a></span>
+    <div class="foot-row">
+      <span>© 2025</span>
+      <button class="contact-toggle" type="button" id="contactToggle" aria-expanded="false" aria-controls="contactPanel">+ CONTACT</button>
+    </div>
+
+    <div class="contact-panel" id="contactPanel">
+      <form class="contact-form" id="contactForm" novalidate>
+        <textarea class="contact-memo" name="message" placeholder="MEMO" required></textarea>
+        <input class="contact-visitor" type="text" name="visitor" placeholder="NAME / EMAIL (OPTIONAL)">
+        <div class="contact-actions">
+          <button class="send-btn" type="submit">SEND</button>
+          <span class="send-status" id="sendStatus" aria-live="polite"></span>
+        </div>
+      </form>
+    </div>
   </footer>
 
   <script src="script.js"></script>

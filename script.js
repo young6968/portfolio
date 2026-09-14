@@ -6,6 +6,8 @@
 (function () {
   'use strict';
 
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/myeyqvvw';
+
   /* ------------------------------------------------------------------
      1. 專案資料（共 6 件，每件 10 張圖面）
         圖片路徑：images/p{id}-{1..10}.jpg
@@ -330,10 +332,85 @@
   }
 
   /* ==================================================================
-     5. 啟動
+     5. 互動：愛心按鈕 + 留言板（Formspree）
+     ================================================================== */
+  function postToFormspree(payload) {
+    return fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  }
+
+  function initHeart() {
+    var btn = $('#heartBtn');
+    if (!btn) { return; }
+
+    btn.addEventListener('click', function () {
+      btn.classList.remove('is-liked');
+      void btn.offsetWidth;              // 強制 reflow，讓動畫可重複播放
+      btn.classList.add('is-liked');
+
+      postToFormspree({ type: 'Heart Like', message: 'A visitor liked your portfolio!' })
+        .catch(function () {});          // 背景送出，失敗也不打擾訪客
+    });
+  }
+
+  function initContact() {
+    var toggle = $('#contactToggle');
+    var panel  = $('#contactPanel');
+    var form   = $('#contactForm');
+    if (!toggle || !panel || !form) { return; }
+
+    var status  = $('#sendStatus');
+    var sendBtn = $('.send-btn', form);
+
+    toggle.addEventListener('click', function () {
+      var open = panel.classList.toggle('is-open');
+      toggle.textContent = open ? '— CLOSE' : '+ CONTACT';
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    function showStatus(text, ms) {
+      status.textContent = text;
+      status.classList.add('is-visible');
+      setTimeout(function () { status.classList.remove('is-visible'); }, ms);
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var memo    = form.message.value.trim();
+      var visitor = form.visitor.value.trim();
+      if (!memo) { form.message.focus(); return; }
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'SENDING...';
+
+      postToFormspree({
+        type: 'Contact Memo',
+        message: memo,
+        visitor: visitor || 'N/A'
+      }).then(function () {
+        form.reset();
+        showStatus('SENT WITH THANKS', 2000);
+        setTimeout(function () {
+          sendBtn.disabled = false;
+          sendBtn.textContent = 'SEND';
+        }, 2000);
+      }).catch(function () {
+        showStatus('SOMETHING WENT WRONG', 2500);
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'SEND';
+      });
+    });
+  }
+
+  /* ==================================================================
+     6. 啟動
      ================================================================== */
   function boot() {
-    if (document.body.classList.contains('page-home'))    { initHome(); }
+    if (document.body.classList.contains('page-home'))    { initHome(); initHeart(); initContact(); }
     if (document.body.classList.contains('page-project')) { initProject(); }
   }
 
