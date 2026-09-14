@@ -6,6 +6,13 @@
 <meta name="description" content="李心樣 LEE SINYANG — Studio Work, Y1 — Y3">
 <title>李心樣 LEE SINYANG — Architecture Portfolio</title>
 <link rel="stylesheet" href="style.css">
+<link rel="preload" as="image" href="images/cover-1.png" fetchpriority="high">
+<!-- 桌機（>768px）沿用瀏覽器原生預載，畫質與速度完全不變；手機由 script.js 延遲載入 -->
+<link rel="preload" as="image" href="images/cover-2.jpg" media="(min-width: 769px)">
+<link rel="preload" as="image" href="images/cover-3.jpg" media="(min-width: 769px)">
+<link rel="preload" as="image" href="images/cover-4.png" media="(min-width: 769px)">
+<link rel="preload" as="image" href="images/cover-5.jpg" media="(min-width: 769px)">
+<link rel="preload" as="image" href="images/cover-6.jpg" media="(min-width: 769px)">
 </head>
 <body class="page-home">
 
@@ -31,7 +38,7 @@
 
         <article class="slide is-active" data-id="1" aria-hidden="false">
           <a class="slide-link" href="project.html?id=1">
-            <img src="images/cover-1.png" alt="都市漫遊者企劃 Teeming Cavity">
+            <img src="images/cover-1.png" alt="都市漫遊者企劃 Teeming Cavity" fetchpriority="high" decoding="async">
             <div class="slide-caption">
               <h2 class="s-title-cn">都市漫遊者企劃</h2>
               <p class="s-title-en">TEEMING CAVITY</p>
@@ -42,7 +49,7 @@
 
         <article class="slide" data-id="2" aria-hidden="true">
           <a class="slide-link" href="project.html?id=2">
-            <img src="images/cover-2.jpg" alt="閭巷囊體 Everyday Block">
+            <img data-src="images/cover-2.jpg" alt="閭巷囊體 Everyday Block" loading="lazy" decoding="async">
             <div class="slide-caption">
               <h2 class="s-title-cn">閭巷囊體</h2>
               <p class="s-title-en">EVERYDAY BLOCK</p>
@@ -53,7 +60,7 @@
 
         <article class="slide" data-id="3" aria-hidden="true">
           <a class="slide-link" href="project.html?id=3">
-            <img src="images/cover-3.jpg" alt="海線物語 Ephemeral-Mass">
+            <img data-src="images/cover-3.jpg" alt="海線物語 Ephemeral-Mass" loading="lazy" decoding="async">
             <div class="slide-caption">
               <h2 class="s-title-cn">海線物語</h2>
               <p class="s-title-en">EPHEMERAL-MASS</p>
@@ -64,7 +71,7 @@
 
         <article class="slide" data-id="4" aria-hidden="true">
           <a class="slide-link" href="project.html?id=4">
-            <img src="images/cover-4.png" alt="居住身體與都市身體 Slit Oculus">
+            <img data-src="images/cover-4.png" alt="居住身體與都市身體 Slit Oculus" loading="lazy" decoding="async">
             <div class="slide-caption">
               <h2 class="s-title-cn">居住身體與都市身體</h2>
               <p class="s-title-en">SLIT OCULUS</p>
@@ -75,7 +82,7 @@
 
         <article class="slide" data-id="5" aria-hidden="true">
           <a class="slide-link" href="project.html?id=5">
-            <img src="images/cover-5.jpg" alt="室內·視外·室外·視內">
+            <img data-src="images/cover-5.jpg" alt="室內·視外·室外·視內" loading="lazy" decoding="async">
             <div class="slide-caption">
               <h2 class="s-title-cn">室內·視外·室外·視內</h2>
               <p class="s-title-en">[ IN ] SIGHT · OUT&nbsp;&nbsp;[ OUT ] SITE · IN</p>
@@ -86,7 +93,7 @@
 
         <article class="slide" data-id="6" aria-hidden="true">
           <a class="slide-link" href="project.html?id=6">
-            <img src="images/cover-6.jpg" alt="之間 Between">
+            <img data-src="images/cover-6.jpg" alt="之間 Between" loading="lazy" decoding="async">
             <div class="slide-caption">
               <h2 class="s-title-cn">之間</h2>
               <p class="s-title-en">BETWEEN</p>

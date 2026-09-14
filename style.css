@@ -577,7 +577,8 @@ body {
   body { font-size: 12px; }
 
   /* ---- 首頁封面：1:1 正方形 ---- */
-  .slides { aspect-ratio: 1 / 1; height: auto; max-height: 80vh; }
+  .slides { aspect-ratio: 1 / 1; height: auto; max-height: 80vh; contain: layout paint; }
+  .slide { contain: layout paint; }
 
   .head-meta { display: none; }
   .profile-grid { grid-template-columns: 1fr; row-gap: 48px; }
@@ -592,6 +593,7 @@ body {
     height: 100vh;
     height: 100dvh;
     overflow: hidden;
+    contain: content;
   }
   .sheet {
     position: absolute;
@@ -600,12 +602,15 @@ body {
     padding: clamp(64px, 12vh, 92px) 20px clamp(48px, 8vh, 72px);
     opacity: 0;
     visibility: hidden;
+    contain: layout paint style;
+    content-visibility: auto;      /* 非當前頁跳過渲染運算，避免手機重繪卡頓 */
     transition: opacity 900ms var(--ease), visibility 0s linear 900ms;
   }
   .sheet.is-current {
     opacity: 1;
     visibility: visible;
     z-index: 2;
+    content-visibility: visible;   /* 當前頁強制完整渲染 */
     transition: opacity 900ms var(--ease), visibility 0s;
   }
   .sheet-fig img { max-height: 58vh; }

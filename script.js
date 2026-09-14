@@ -61,14 +61,26 @@
     img.parentNode.replaceChild(box, img);
   }
 
+  /* 尚未 hydrate（僅有 data-src）的圖片先略過，避免被誤判為破圖 */
+  function watchImage(img) {
+    if (!img || img.dataset.src) { return; }
+    if (img.complete && img.naturalWidth === 0) {
+      placeholder(img);
+    } else {
+      img.addEventListener('error', function () { placeholder(img); });
+    }
+  }
+
   function watchImages(root) {
-    $$('img', root).forEach(function (img) {
-      if (img.complete && img.naturalWidth === 0) {
-        placeholder(img);
-      } else {
-        img.addEventListener('error', function () { placeholder(img); });
-      }
-    });
+    $$('img', root).forEach(watchImage);
+  }
+
+  /* 手機端效能優化：將 data-src 轉為真正的 src，延遲到真正需要時才發出請求 */
+  function hydrateImage(img) {
+    if (!img || !img.dataset.src) { return; }
+    img.src = img.dataset.src;
+    delete img.dataset.src;
+    watchImage(img);
   }
 
   /* ==================================================================
@@ -86,6 +98,22 @@
     var index = 0;
     var timer = null;
     var paused = false;
+
+    /* --- 手機封面：只優先載入目前＋前後各一張，其餘延遲到輪播到達前才載入 --- */
+    var slideImgs = slides.map(function (s) { return $('img', s); });
+    var isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+    function hydrateAround(i) {
+      hydrateImage(slideImgs[i]);
+      hydrateImage(slideImgs[(i + 1) % slides.length]);
+      hydrateImage(slideImgs[(i - 1 + slides.length) % slides.length]);
+    }
+
+    if (isMobile) {
+      hydrateAround(0);                 // 首屏封面優先，鄰近兩張背景預抓
+    } else {
+      slideImgs.forEach(hydrateImage);  // 桌機：維持原本立即全載入、高清不變
+    }
 
     /* --- 建立進度線 --- */
     var dots = slides.map(function (slide, i) {
@@ -126,6 +154,7 @@
       counterCur.textContent = pad2(next + 1);
       index = next;
 
+      if (isMobile) { hydrateAround(next); }
       if (manual) { restart(); }
     }
 
@@ -186,6 +215,10 @@
     var data  = PROJECTS[id];
     var sheetsBox = $('#sheets');
 
+    /* 手機端效能優化：只有第 1、2 張圖立即載入，其餘延遲到捲動／點擊到達前才發出請求 */
+    var lazyMode     = window.matchMedia('(max-width: 768px)').matches;
+    var mobileQuery  = window.matchMedia('(max-width: 640px)');   // 原地畫冊模式（與 CSS 斷點一致）
+
     /* --- 標頭 --- */
     document.title = data.cn + ' ' + data.en + ' — 李心樣 LEE SINYANG';
     $('#projTitleCn').textContent = data.cn;
@@ -205,7 +238,13 @@
       fig.className = 'sheet-fig';
 
       var img = document.createElement('img');
-      img.src = 'images/p' + id + '-' + i + '.jpg';
+      var src = 'images/p' + id + '-' + i + '.jpg';
+      if (lazyMode && i > 2) {
+        img.dataset.src = src;          // 延遲載入：捲動／點擊到達前才 hydrate
+      } else {
+        img.src = src;
+        if (i === 1) { img.setAttribute('fetchpriority', 'high'); }
+      }
       img.alt = data.en + ' — ' + data.sheets[i - 1];
       img.loading = (i > 2) ? 'lazy' : 'eager';
       img.decoding = 'async';
@@ -263,7 +302,14 @@
     if ('IntersectionObserver' in window) {
       var fadeIn = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
-          if (en.isIntersecting) { en.target.classList.add('is-visible'); }
+          if (en.isIntersecting) {
+            en.target.classList.add('is-visible');
+            /* 640~768px 區間仍是桌機式捲動版面，捲到哪一頁就 hydrate 哪一頁；
+               原地畫冊模式（≤640px）改由 showSheet() 依點擊/滑動精準 hydrate，這裡略過 */
+            if (lazyMode && !mobileQuery.matches) {
+              hydrateImage($('img', en.target));
+            }
+          }
         });
       }, { threshold: 0.18 });
 
@@ -287,7 +333,6 @@
     watchImages(sheetsBox);
 
     /* --- 手機版：原地畫冊切換模式（Tap / Swipe to Navigate） --- */
-    var mobileQuery = window.matchMedia('(max-width: 640px)');
     var currentIndex = 0;
 
     function showSheet(next) {
@@ -299,6 +344,11 @@
       });
       currentIndex = next;
       setCurrent(currentIndex);
+
+      /* 預先加載前後各一張，切換更順暢，其餘頁面維持延遲載入 */
+      hydrateImage($('img', sections[next]));
+      if (sections[next - 1]) { hydrateImage($('img', sections[next - 1])); }
+      if (sections[next + 1]) { hydrateImage($('img', sections[next + 1])); }
     }
 
     sheetsBox.addEventListener('click', function (e) {
