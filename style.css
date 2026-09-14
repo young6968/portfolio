@@ -46,11 +46,11 @@ body {
 
 /* 共用微字級標籤 */
 .label {
-  font-size: .625rem;          /* 10px */
-  letter-spacing: .3em;
+  font-size: .5625rem;         /* 9px */
+  letter-spacing: .28em;
   text-transform: uppercase;
   color: var(--gray-light);
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 
 /* 圖片尚未放入 images/ 時的極簡佔位框 */
@@ -240,36 +240,47 @@ body {
    PROFILE
    ========================================================================== */
 .profile {
-  padding: clamp(80px, 16vh, 190px) var(--pad) clamp(60px, 11vh, 130px);
+  padding: clamp(80px, 16vh, 190px) var(--pad) clamp(48px, 8vh, 90px);
 }
 
 .profile-grid {
   display: grid;
-  grid-template-columns: minmax(180px, .9fr) minmax(280px, 1.25fr) minmax(200px, 1fr);
+  grid-template-columns: minmax(180px, .8fr) minmax(280px, 1.3fr) minmax(200px, 1fr);
   gap: clamp(36px, 6vw, 110px);
   align-items: start;
+  border-top: 1px solid #eaeaea;
+  padding-top: 44px;
 }
 
+/* ---- 左欄 [IDENTIFIER]：姓名 / Email / 微型按鈕群，垂直收束 ---- */
 .identity {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
 }
 .identity-name {
   font-size: .6875rem;         /* 11px */
-  letter-spacing: .22em;
+  letter-spacing: .15em;
   color: var(--ink-soft);
 }
 .identity-mail {
   font-size: .625rem;          /* 10px */
-  letter-spacing: .1em;
+  letter-spacing: .04em;
+  text-transform: lowercase;
   color: var(--gray);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid transparent;
   padding-bottom: 2px;
   transition: border-color 400ms var(--ease), color 400ms var(--ease);
 }
-.identity-mail:hover { color: var(--ink); border-color: var(--ink); }
+.identity-mail:hover { color: var(--ink); border-color: var(--line); }
+
+.identity-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
 
 .heart-btn {
   display: inline-flex;
@@ -303,26 +314,26 @@ body {
 .bio li {
   display: flex;
   gap: 18px;
-  font-size: .75rem;           /* 12px */
-  line-height: 2.2;
+  font-size: .625rem;          /* 10px */
+  line-height: 1.75;
   color: var(--ink-soft);
 }
 .bio .yr {
-  flex: 0 0 88px;
-  font-size: .625rem;
-  letter-spacing: .16em;
+  flex: 0 0 76px;
+  font-size: .5625rem;         /* 9px */
+  letter-spacing: .1em;
   color: var(--gray-light);
 }
-.bio .txt { letter-spacing: .1em; }
+.bio .txt { letter-spacing: .06em; }
 
-.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; }
 .tags li {
-  font-size: .625rem;          /* 10px */
-  letter-spacing: .18em;
+  font-size: .5625rem;         /* 9px */
+  letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--gray);
   border: 1px solid var(--line);
-  padding: 5px 11px;
+  padding: 5px 10px;
   line-height: 1.6;
   transition: border-color 400ms var(--ease), color 400ms var(--ease);
 }
@@ -332,23 +343,19 @@ body {
    FOOTER
    ========================================================================== */
 .site-foot {
-  padding: 26px var(--pad) 34px;
+  padding: 18px var(--pad) 34px;
   border-top: 1px solid var(--line);
-}
-.foot-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: .625rem;
+  font-size: .5625rem;
   letter-spacing: .24em;
   color: var(--gray-light);
 }
+
+/* 左欄按鈕群：愛心 + CONTACT，緊湊並列，不再橫拉成長條 */
 .contact-toggle {
-  font-size: .625rem;
-  letter-spacing: .3em;
+  font-size: .5625rem;         /* 9px */
+  letter-spacing: .22em;
   color: var(--gray);
-  padding: 10px;
-  margin: -10px;
+  padding: 6px 4px;
   transition: color 400ms var(--ease);
 }
 .contact-toggle:hover { color: var(--ink); }
@@ -372,7 +379,7 @@ body {
   flex-direction: column;
   gap: 16px;
   max-width: 420px;
-  margin-top: 28px;
+  margin-top: 32px;
 }
 .contact-memo,
 .contact-visitor {
