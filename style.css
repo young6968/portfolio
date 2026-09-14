@@ -276,6 +276,7 @@ body {
   color: var(--gray);
   border-bottom: 1px solid transparent;
   padding-bottom: 2px;
+  margin-left: 27px;            /* 對齊姓名「李」的起始位置（愛心寬 20px + 間距 7px） */
   transition: border-color 400ms var(--ease), color 400ms var(--ease);
 }
 .identity-mail:hover { color: var(--ink); border-color: var(--line); }
