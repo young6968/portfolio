@@ -51,9 +51,11 @@
   }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
-  /* 缺圖時以極簡佔位框取代，避免破圖圖示破壞畫面 */
+  /* 缺圖時以極簡佔位框取代，避免破圖圖示破壞畫面。
+     一旦圖片曾經成功 load 過（dataset.loaded），就永遠不再被取代——
+     確保圖片載入完成後不會被任何後續誤判事件覆蓋掉。 */
   function placeholder(img) {
-    if (img.dataset.fallbackDone || !img.parentNode) { return; }
+    if (img.dataset.fallbackDone || img.dataset.loaded || !img.parentNode) { return; }
     img.dataset.fallbackDone = '1';
     var box = document.createElement('div');
     box.className = 'fig-missing';
@@ -61,10 +63,14 @@
     img.parentNode.replaceChild(box, img);
   }
 
-  /* 尚未 hydrate（僅有 data-src）的圖片先略過，避免被誤判為破圖 */
-  function watchImage(img) {
+  /* skipSyncCheck：剛用 JS 動態設定 src 的圖片，若瀏覽器已有快取，
+     img.complete 可能搶先同步變 true，但 naturalWidth 還沒跟上，
+     會被誤判成「破圖」而整個 <img> 被拔掉——這正是手機封面「短暫出現又消失」的成因。
+     這種情況只掛 load / error 監聽，不做當下的同步判斷。 */
+  function watchImage(img, skipSyncCheck) {
     if (!img || img.dataset.src) { return; }
-    if (img.complete && img.naturalWidth === 0) {
+    img.addEventListener('load', function () { img.dataset.loaded = '1'; });
+    if (!skipSyncCheck && img.complete && img.naturalWidth === 0) {
       placeholder(img);
     } else {
       img.addEventListener('error', function () { placeholder(img); });
@@ -72,7 +78,7 @@
   }
 
   function watchImages(root) {
-    $$('img', root).forEach(watchImage);
+    $$('img', root).forEach(function (img) { watchImage(img, false); });
   }
 
   /* 手機端效能優化：將 data-src 轉為真正的 src，延遲到真正需要時才發出請求 */
@@ -80,7 +86,7 @@
     if (!img || !img.dataset.src) { return; }
     img.src = img.dataset.src;
     delete img.dataset.src;
-    watchImage(img);
+    watchImage(img, true);   // 剛設定 src，跳過同步檢查，避免快取命中造成的誤判
   }
 
   /* ==================================================================
