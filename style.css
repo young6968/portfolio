@@ -252,12 +252,17 @@ body {
   padding-top: 44px;
 }
 
-/* ---- 左欄 [IDENTIFIER]：姓名 / Email / 微型按鈕群，垂直收束 ---- */
+/* ---- 左欄 [IDENTIFIER]：愛心＋姓名同行，Email 獨立換行 ---- */
 .identity {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
+}
+.identity-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;                    /* 愛心與姓名間距 6~8px */
 }
 .identity-name {
   font-size: .6875rem;         /* 11px */
@@ -275,19 +280,12 @@ body {
 }
 .identity-mail:hover { color: var(--ink); border-color: var(--line); }
 
-.identity-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 2px;
-}
-
 .heart-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   padding: 0;
 }
 .heart-icon {
@@ -343,19 +341,25 @@ body {
    FOOTER
    ========================================================================== */
 .site-foot {
-  padding: 18px var(--pad) 34px;
+  padding: 26px var(--pad) 34px;
   border-top: 1px solid var(--line);
+}
+.foot-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: .5625rem;
   letter-spacing: .24em;
   color: var(--gray-light);
 }
 
-/* 左欄按鈕群：愛心 + CONTACT，緊湊並列，不再橫拉成長條 */
+/* 頁尾獨立一行的細線文字按鈕 */
 .contact-toggle {
   font-size: .5625rem;         /* 9px */
-  letter-spacing: .22em;
+  letter-spacing: .3em;
   color: var(--gray);
-  padding: 6px 4px;
+  padding: 10px;
+  margin: -10px;
   transition: color 400ms var(--ease);
 }
 .contact-toggle:hover { color: var(--ink); }
