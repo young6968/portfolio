@@ -1,0 +1,301 @@
+/* ==========================================================================
+   LEE SINYANG — Architecture Portfolio
+   script.js : 首頁輪播（5 秒自動淡入切換 / 手動控制 / 點擊跳轉）
+               專案內頁（?id=1~6 讀取資料 / 十頁縱向滑動 / 進場淡入）
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     1. 專案資料（共 6 件，每件 10 張圖面）
+        圖片路徑：images/p{id}-{1..10}.jpg
+     ------------------------------------------------------------------ */
+  var PROJECTS = {
+    1: {
+      cn: '都市漫遊者企劃', en: 'TEEMING CAVITY', grade: 'Junior',
+      sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
+    },
+    2: {
+      cn: '閤巷集體', en: 'EVERYDAY BLOCK', grade: 'Junior',
+      sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
+    },
+    3: {
+      cn: '作品名稱三', en: 'PROJECT THREE', grade: 'Sophomore',
+      sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
+    },
+    4: {
+      cn: '居住身體與都市身體', en: 'SLIT OCULUS', grade: 'Sophomore',
+      sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
+    },
+    5: {
+      cn: '作品名稱五', en: 'PROJECT FIVE', grade: 'Freshman',
+      sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
+    },
+    6: {
+      cn: '作品名稱六', en: 'PROJECT SIX', grade: 'Freshman',
+      sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
+    }
+  };
+
+  var AUTOPLAY = 5000;   // 首頁 5 秒自動切換
+  var SHEETS   = 10;     // 內頁十頁
+
+  /* ------------------------------------------------------------------
+     2. 小工具
+     ------------------------------------------------------------------ */
+  function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+  function $$(sel, ctx) {
+    return Array.prototype.slice.call((ctx || document).querySelectorAll(sel));
+  }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+  /* 缺圖時以極簡佔位框取代，避免破圖圖示破壞畫面 */
+  function placeholder(img) {
+    if (img.dataset.fallbackDone || !img.parentNode) { return; }
+    img.dataset.fallbackDone = '1';
+    var box = document.createElement('div');
+    box.className = 'fig-missing';
+    box.textContent = img.getAttribute('src');
+    img.parentNode.replaceChild(box, img);
+  }
+
+  function watchImages(root) {
+    $$('img', root).forEach(function (img) {
+      if (img.complete && img.naturalWidth === 0) {
+        placeholder(img);
+      } else {
+        img.addEventListener('error', function () { placeholder(img); });
+      }
+    });
+  }
+
+  /* ==================================================================
+     3. 首頁：輪播
+     ================================================================== */
+  function initHome() {
+    var slides = $$('.slide', $('#slides'));
+    if (!slides.length) { return; }
+
+    var progress   = $('#progress');
+    var counterCur = $('#counterCur');
+    var prevBtn    = $('#prevBtn');
+    var nextBtn    = $('#nextBtn');
+
+    var index = 0;
+    var timer = null;
+    var paused = false;
+
+    /* --- 建立進度線 --- */
+    var dots = slides.map(function (slide, i) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'dot';
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-label', '第 ' + (i + 1) + ' 件作品');
+      btn.innerHTML = '<span class="dot-fill"></span>';
+      btn.addEventListener('click', function () { goTo(i, true); });
+      progress.appendChild(btn);
+      return btn;
+    });
+
+    /* --- 切換 --- */
+    function goTo(next, manual) {
+      next = (next + slides.length) % slides.length;
+
+      slides.forEach(function (s, i) {
+        var on = (i === next);
+        s.classList.toggle('is-active', on);
+        s.setAttribute('aria-hidden', on ? 'false' : 'true');
+      });
+
+      dots.forEach(function (d, i) {
+        d.classList.remove('is-active');
+        d.setAttribute('aria-selected', i === next ? 'true' : 'false');
+      });
+
+      /* 重新啟動進度線動畫 */
+      var fill = $('.dot-fill', dots[next]);
+      fill.style.animation = 'none';
+      void fill.offsetWidth;          // 強制 reflow
+      fill.style.animation = '';
+      dots[next].classList.add('is-active');
+      dots[next].classList.toggle('is-paused', paused);
+
+      counterCur.textContent = pad2(next + 1);
+      index = next;
+
+      if (manual) { restart(); }
+    }
+
+    function nextSlide() { goTo(index + 1, false); }
+    function prevSlide() { goTo(index - 1, true); }
+
+    function restart() {
+      clearInterval(timer);
+      if (!paused) { timer = setInterval(nextSlide, AUTOPLAY); }
+    }
+
+    function setPaused(state) {
+      paused = state;
+      dots.forEach(function (d) { d.classList.toggle('is-paused', state); });
+      if (state) { clearInterval(timer); } else { restart(); }
+    }
+
+    /* --- 控制項 --- */
+    nextBtn.addEventListener('click', function () { goTo(index + 1, true); });
+    prevBtn.addEventListener('click', prevSlide);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { goTo(index + 1, true); }
+      if (e.key === 'ArrowLeft')  { prevSlide(); }
+    });
+
+    /* 分頁切到背景時暫停，回來再續播 */
+    document.addEventListener('visibilitychange', function () {
+      setPaused(document.hidden);
+    });
+
+    /* 手機左右滑動 */
+    var touchX = null;
+    var slidesBox = $('#slides');
+    slidesBox.addEventListener('touchstart', function (e) {
+      touchX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    slidesBox.addEventListener('touchend', function (e) {
+      if (touchX === null) { return; }
+      var dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 45) { dx < 0 ? goTo(index + 1, true) : prevSlide(); }
+      touchX = null;
+    }, { passive: true });
+
+    watchImages(document);
+    goTo(0, false);
+    restart();
+  }
+
+  /* ==================================================================
+     4. 專案內頁：依 ?id=X 建立十頁
+     ================================================================== */
+  function initProject() {
+    var params = new URLSearchParams(window.location.search);
+    var id = parseInt(params.get('id'), 10);
+    if (!PROJECTS[id]) { id = 1; }
+
+    var data  = PROJECTS[id];
+    var sheetsBox = $('#sheets');
+
+    /* --- 標頭 --- */
+    document.title = data.cn + ' ' + data.en + ' — 李心樣 LEE SINYANG';
+    $('#projTitleCn').textContent = data.cn;
+    $('#projTitleEn').textContent = data.en;
+    $('#projMeta').textContent    = data.grade;
+
+    /* --- 十頁 --- */
+    var frag = document.createDocumentFragment();
+
+    for (var i = 1; i <= SHEETS; i++) {
+      var sec = document.createElement('section');
+      sec.className = 'sheet';
+      sec.id = 'sheet-' + pad2(i);
+      sec.dataset.index = String(i);
+
+      var fig = document.createElement('figure');
+      fig.className = 'sheet-fig';
+
+      var img = document.createElement('img');
+      img.src = 'images/p' + id + '-' + i + '.jpg';
+      img.alt = data.en + ' — ' + data.sheets[i - 1];
+      img.loading = (i > 2) ? 'lazy' : 'eager';
+      img.decoding = 'async';
+      fig.appendChild(img);
+
+      var cap = document.createElement('figcaption');
+      cap.className = 'sheet-cap';
+      var sheetLabel = data.sheets[i - 1];
+      cap.innerHTML =
+        '<span class="num">' + pad2(i) + ' / ' + SHEETS + '</span>' +
+        (sheetLabel && sheetLabel !== pad2(i)
+          ? '<span class="txt">' + sheetLabel + '</span>'
+          : '');
+
+      sec.appendChild(fig);
+      sec.appendChild(cap);
+
+      /* 第一頁附上簡短說明（若有提供） */
+      if (i === 1 && data.note) {
+        var note = document.createElement('p');
+        note.className = 'sheet-note';
+        note.textContent = data.note;
+        sec.appendChild(note);
+      }
+
+      frag.appendChild(sec);
+    }
+
+    sheetsBox.appendChild(frag);
+
+    var sections = $$('.sheet', sheetsBox);
+
+    /* --- 右側導覽細線 --- */
+    var railTicks = $('#railTicks');
+    var railNum   = $('#railNum');
+
+    var ticks = sections.map(function (sec, i) {
+      var t = document.createElement('button');
+      t.type = 'button';
+      t.className = 'tick';
+      t.setAttribute('aria-label', '前往第 ' + pad2(i + 1) + ' 頁');
+      t.addEventListener('click', function () {
+        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      railTicks.appendChild(t);
+      return t;
+    });
+
+    function setCurrent(i) {
+      ticks.forEach(function (t, n) { t.classList.toggle('is-current', n === i); });
+      railNum.textContent = pad2(i + 1);
+    }
+
+    /* --- 進場淡入 + 目前頁碼 --- */
+    if ('IntersectionObserver' in window) {
+      var fadeIn = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add('is-visible'); }
+        });
+      }, { threshold: 0.18 });
+
+      var current = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            setCurrent(parseInt(en.target.dataset.index, 10) - 1);
+          }
+        });
+      }, { threshold: 0.5 });
+
+      sections.forEach(function (sec) {
+        fadeIn.observe(sec);
+        current.observe(sec);
+      });
+    } else {
+      sections.forEach(function (sec) { sec.classList.add('is-visible'); });
+    }
+
+    setCurrent(0);
+    watchImages(sheetsBox);
+  }
+
+  /* ==================================================================
+     5. 啟動
+     ================================================================== */
+  function boot() {
+    if (document.body.classList.contains('page-home'))    { initHome(); }
+    if (document.body.classList.contains('page-project')) { initProject(); }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
