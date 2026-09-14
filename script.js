@@ -384,11 +384,24 @@
   /* ==================================================================
      5. 互動：愛心按鈕 + 留言板（Formspree）
      ================================================================== */
+  /* Formspree 標準 AJAX 寫法：POST + Accept/Content-Type 皆為 application/json。
+     若 response.ok 為 false，把狀態碼與伺服器回傳的錯誤內容印到 console，
+     並 reject 一個帶有詳細訊息的 Error，讓呼叫端能區分「網路failure」與「表單被拒絕」。 */
   function postToFormspree(payload) {
     return fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(payload)
+    }).then(function (response) {
+      if (response.ok) { return response; }
+      return response.json().catch(function () { return null; }).then(function (data) {
+        var detail = (data && data.errors) ? JSON.stringify(data.errors) : response.statusText;
+        console.error('[Formspree] submission failed —', response.status, detail, data);
+        throw new Error('Formspree ' + response.status + ': ' + detail);
+      });
     });
   }
 
@@ -401,8 +414,14 @@
       void btn.offsetWidth;              // 強制 reflow，讓動畫可重複播放
       btn.classList.add('is-liked');
 
-      postToFormspree({ type: 'Heart Like', message: 'A visitor liked your portfolio!' })
-        .catch(function () {});          // 背景送出，失敗也不打擾訪客
+      postToFormspree({
+        name: 'Anonymous',
+        email: 'Not provided',
+        message: 'A visitor liked your portfolio!',
+        _subject: 'New Heart Like on Portfolio'
+      }).catch(function (err) {
+        console.error('[Heart Button] send failed:', err);   // 背景送出，失敗也不打擾訪客
+      });
     });
   }
 
@@ -438,9 +457,10 @@
       sendBtn.textContent = 'SENDING...';
 
       postToFormspree({
-        type: 'Contact Memo',
+        name: visitor || 'Anonymous',
+        email: 'Not provided',
         message: memo,
-        visitor: visitor || 'N/A'
+        _subject: 'New Portfolio Memo from Visitor'
       }).then(function () {
         form.reset();
         showStatus('SENT WITH THANKS', 2000);
@@ -448,7 +468,8 @@
           sendBtn.disabled = false;
           sendBtn.textContent = 'SEND';
         }, 2000);
-      }).catch(function () {
+      }).catch(function (err) {
+        console.error('[Contact Form] send failed:', err);
         showStatus('SOMETHING WENT WRONG', 2500);
         sendBtn.disabled = false;
         sendBtn.textContent = 'SEND';
