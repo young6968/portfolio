@@ -283,6 +283,50 @@
 
     setCurrent(0);
     watchImages(sheetsBox);
+
+    /* --- 手機版：原地畫冊切換模式（Tap / Swipe to Navigate） --- */
+    var mobileQuery = window.matchMedia('(max-width: 640px)');
+    var currentIndex = 0;
+
+    function showSheet(next) {
+      next = Math.max(0, Math.min(sections.length - 1, next));
+      sections.forEach(function (sec, n) {
+        var on = (n === next);
+        sec.classList.toggle('is-current', on);
+        if (on) { sec.classList.add('is-visible'); }
+      });
+      currentIndex = next;
+      setCurrent(currentIndex);
+    }
+
+    sheetsBox.addEventListener('click', function (e) {
+      if (!mobileQuery.matches) { return; }
+      var rect = sheetsBox.getBoundingClientRect();
+      var tappedRight = (e.clientX - rect.left) > rect.width / 2;
+      showSheet(currentIndex + (tappedRight ? 1 : -1));
+    });
+
+    var pTouchX = null;
+    sheetsBox.addEventListener('touchstart', function (e) {
+      if (!mobileQuery.matches) { return; }
+      pTouchX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    sheetsBox.addEventListener('touchend', function (e) {
+      if (!mobileQuery.matches || pTouchX === null) { return; }
+      var dx = e.changedTouches[0].clientX - pTouchX;
+      if (Math.abs(dx) > 40) { showSheet(currentIndex + (dx < 0 ? 1 : -1)); }
+      pTouchX = null;
+    }, { passive: true });
+
+    if (mobileQuery.matches) { showSheet(0); }
+    (mobileQuery.addEventListener ? mobileQuery.addEventListener.bind(mobileQuery, 'change')
+      : mobileQuery.addListener.bind(mobileQuery))(function (e) {
+      if (e.matches) {
+        showSheet(currentIndex);
+      } else {
+        sections.forEach(function (sec) { sec.classList.remove('is-current'); });
+      }
+    });
   }
 
   /* ==================================================================

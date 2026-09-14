@@ -348,6 +348,8 @@ body {
   letter-spacing: .3em;
   color: var(--gray);
   transition: color 400ms var(--ease);
+  padding: 12px;
+  margin: -12px;   /* 擴大手機點擊範圍，不影響視覺字級與位置 */
 }
 .back:hover { color: var(--ink); }
 .back .arrow {
@@ -473,14 +475,41 @@ body {
 
 @media (max-width: 640px) {
   body { font-size: 12px; }
-  .slides { height: 58vh; }
+
+  /* ---- 首頁封面：1:1 正方形 ---- */
+  .slides { aspect-ratio: 1 / 1; height: auto; max-height: 80vh; }
+
   .head-meta { display: none; }
   .profile-grid { grid-template-columns: 1fr; row-gap: 48px; }
   .bio li { flex-direction: column; gap: 0; line-height: 2; }
   .bio .yr { flex: none; }
   .rail { display: none; }
   .proj-id .p-cn, .proj-id .p-meta { display: none; }
+
+  /* ---- 作品內頁：原地畫冊切換模式（Single Page Viewer） ---- */
+  .sheets {
+    position: relative;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .sheet {
+    position: absolute;
+    inset: 0;
+    min-height: 0;
+    padding: clamp(64px, 12vh, 92px) 20px clamp(48px, 8vh, 72px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 900ms var(--ease), visibility 0s linear 900ms;
+  }
+  .sheet.is-current {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+    transition: opacity 900ms var(--ease), visibility 0s;
+  }
   .sheet-fig img { max-height: 58vh; }
+  .sheet-note { display: none; }   /* 單頁模式聚焦圖面，說明文字收起 */
 }
 
 /* ==========================================================================
