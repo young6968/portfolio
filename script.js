@@ -20,7 +20,7 @@
       sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
     },
     3: {
-      cn: '作品名稱三', en: 'PROJECT THREE', grade: 'Sophomore',
+      cn: '海線物語', en: 'EPHEMERAL-MASS', grade: 'Sophomore',
       sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
     },
     4: {
@@ -28,11 +28,11 @@
       sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
     },
     5: {
-      cn: '作品名稱五', en: 'PROJECT FIVE', grade: 'Freshman',
+      cn: '室內·視外·室外·視內', en: '[ IN ] SIGHT · OUT  [ OUT ] SITE · IN', grade: 'Freshman',
       sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
     },
     6: {
-      cn: '作品名稱六', en: 'PROJECT SIX', grade: 'Freshman',
+      cn: '之間', en: 'BETWEEN', grade: 'Freshman',
       sheets: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
     }
   };
