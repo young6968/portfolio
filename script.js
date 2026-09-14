@@ -384,9 +384,8 @@
   /* ==================================================================
      5. 互動：愛心按鈕 + 留言板（Formspree）
      ================================================================== */
-  /* Formspree 標準 AJAX 寫法：POST + Accept/Content-Type 皆為 application/json。
-     若 response.ok 為 false，把狀態碼與伺服器回傳的錯誤內容印到 console，
-     並 reject 一個帶有詳細訊息的 Error，讓呼叫端能區分「網路failure」與「表單被拒絕」。 */
+  /* Formspree 標準 AJAX 寫法：POST + Accept/Content-Type 皆為 application/json，
+     回傳原始 Response，由呼叫端自行判斷 response.ok。 */
   function postToFormspree(payload) {
     return fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
@@ -395,13 +394,12 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
-    }).then(function (response) {
-      if (response.ok) { return response; }
-      return response.json().catch(function () { return null; }).then(function (data) {
-        var detail = (data && data.errors) ? JSON.stringify(data.errors) : response.statusText;
-        console.error('[Formspree] submission failed —', response.status, detail, data);
-        throw new Error('Formspree ' + response.status + ': ' + detail);
-      });
+    });
+  }
+
+  function logFormspreeError(context, response) {
+    response.json().catch(function () { return null; }).then(function (data) {
+      console.log('[Formspree] ' + context + ' failed —', response.status, data);
     });
   }
 
@@ -414,14 +412,11 @@
       void btn.offsetWidth;              // 強制 reflow，讓動畫可重複播放
       btn.classList.add('is-liked');
 
-      postToFormspree({
-        name: 'Anonymous',
-        email: 'Not provided',
-        message: 'A visitor liked your portfolio!',
-        _subject: 'New Heart Like on Portfolio'
-      }).catch(function (err) {
-        console.error('[Heart Button] send failed:', err);   // 背景送出，失敗也不打擾訪客
-      });
+      postToFormspree({ message: 'Someone gave a heart to your portfolio!' })
+        .then(function (response) {
+          if (!response.ok) { logFormspreeError('heart like', response); }
+        })
+        .catch(function (err) { console.log('[Formspree] heart like network error:', err); });
     });
   }
 
@@ -457,19 +452,24 @@
       sendBtn.textContent = 'SENDING...';
 
       postToFormspree({
-        name: visitor || 'Anonymous',
-        email: 'Not provided',
-        message: memo,
-        _subject: 'New Portfolio Memo from Visitor'
-      }).then(function () {
-        form.reset();
-        showStatus('SENT WITH THANKS', 2000);
-        setTimeout(function () {
+        email: visitor || 'visitor@portfolio.com',
+        message: memo
+      }).then(function (response) {
+        if (response.ok) {
+          form.reset();
+          showStatus('SENT WITH THANKS', 2000);
+          setTimeout(function () {
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'SEND';
+          }, 2000);
+        } else {
+          logFormspreeError('memo', response);
+          showStatus('SOMETHING WENT WRONG', 2500);
           sendBtn.disabled = false;
           sendBtn.textContent = 'SEND';
-        }, 2000);
+        }
       }).catch(function (err) {
-        console.error('[Contact Form] send failed:', err);
+        console.log('[Formspree] memo network error:', err);
         showStatus('SOMETHING WENT WRONG', 2500);
         sendBtn.disabled = false;
         sendBtn.textContent = 'SEND';
