@@ -87,6 +87,9 @@
     img.src = img.dataset.src;
     delete img.dataset.src;
     watchImage(img, true);   // 剛設定 src，跳過同步檢查，避免快取命中造成的誤判
+    if (img.complete && img.naturalWidth > 0) {
+      img.dataset.loaded = '1';   // 圖片已在瀏覽器快取中，同步命中時立即標記完成
+    }
   }
 
   /* ==================================================================
@@ -115,8 +118,19 @@
       hydrateImage(slideImgs[(i - 1 + slides.length) % slides.length]);
     }
 
+    /* ±1 視窗只保證「下一步」來得及載入，但使用者快速連續滑動／點擊時
+       （例如短時間內連續切換好幾張）會跳過中間的預抓步驟，導致某張封面
+       （例如封面 5）切到時圖片仍在下載中而短暫顯示空白。
+       用 requestIdleCallback／setTimeout 在首屏繪製後，於背景把其餘所有
+       封面都排入低優先權下載，從根本消除「切到時還沒開始抓」的競速問題。 */
+    function hydrateAllIdle() {
+      var schedule = window.requestIdleCallback || function (cb) { return setTimeout(cb, 300); };
+      schedule(function () { slideImgs.forEach(hydrateImage); });
+    }
+
     if (isMobile) {
-      hydrateAround(0);                 // 首屏封面優先，鄰近兩張背景預抓
+      hydrateAround(0);                 // 首屏封面優先，鄰近兩張立即預抓
+      hydrateAllIdle();                 // 其餘封面背景預抓，避免快速切換時競速
     } else {
       slideImgs.forEach(hydrateImage);  // 桌機：維持原本立即全載入、高清不變
     }
@@ -161,6 +175,17 @@
       index = next;
 
       if (isMobile) { hydrateAround(next); }
+
+      /* 診斷：若切到的封面圖尚未載入完成，留下記錄以便追查是哪一張、
+         發生在哪個時間點——不影響顯示，圖片仍會在載入完成後立即補上 */
+      var activeImg = slideImgs[next];
+      if (activeImg && !activeImg.dataset.loaded && !(activeImg.complete && activeImg.naturalWidth > 0)) {
+        console.warn(
+          '[Carousel] Slide ' + (next + 1) + ' (data-id=' + slides[next].dataset.id + ', ' +
+          (activeImg.currentSrc || activeImg.src || activeImg.dataset.src) + ') became active before its cover image finished loading.'
+        );
+      }
+
       if (manual) { restart(); }
     }
 
