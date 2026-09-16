@@ -205,6 +205,24 @@
       touchX = null;
     }, { passive: true });
 
+    /* --- 手機微型提示：首次造訪引導點擊，互動一次後淡出並記住 --- */
+    var tapHint = $('#tapHint');
+    if (tapHint) {
+      var hintSeen = false;
+      try { hintSeen = !!localStorage.getItem('tapHintSeen'); } catch (e) {}
+
+      if (hintSeen) {
+        tapHint.classList.add('is-hidden');
+      } else {
+        var dismissTapHint = function () {
+          tapHint.classList.add('is-hidden');
+          try { localStorage.setItem('tapHintSeen', '1'); } catch (e) {}
+        };
+        slidesBox.addEventListener('touchend', dismissTapHint, { passive: true, once: true });
+        slidesBox.addEventListener('click', dismissTapHint, { once: true });
+      }
+    }
+
     watchImages(document);
     goTo(0, false);
     restart();

@@ -121,7 +121,7 @@ body {
   transition: opacity var(--fade) var(--ease), visibility 0s;
 }
 
-.slide-link { display: block; width: 100%; height: 100%; position: relative; }
+.slide-link { display: block; width: 100%; height: 100%; position: relative; cursor: pointer; }
 
 .slide img {
   width: 100%;
@@ -131,6 +131,42 @@ body {
   transition: transform 7200ms linear;
 }
 .slide.is-active img { transform: scale(1.045); }   /* 極輕微推進 */
+
+/* 懸停：明確表達「可點擊進入」的極細微縮放回饋，轉場快於 Ken Burns 的緩慢推進 */
+.slide-link:hover img,
+.slide-link:focus-visible img {
+  transform: scale(1.065);
+  transition: transform 900ms var(--ease);
+}
+
+/* 懸停：淡入的「VIEW PROJECT」提示，與左下角說明文字對稱置於右下角 */
+.view-affordance {
+  position: absolute;
+  right: clamp(20px, 3.4vw, 48px);
+  bottom: clamp(22px, 4vh, 44px);
+  z-index: 2;
+  font-size: .625rem;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--on-image);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 500ms var(--ease), transform 500ms var(--ease);
+  pointer-events: none;
+}
+.va-arrow {
+  display: inline-block;
+  transition: transform 500ms var(--ease);
+}
+.slide-link:hover .view-affordance,
+.slide-link:focus-visible .view-affordance {
+  opacity: .8;
+  transform: translateY(0);
+}
+.slide-link:hover .va-arrow,
+.slide-link:focus-visible .va-arrow {
+  transform: translate(2px, -2px);
+}
 
 .slide .fig-missing { height: 100%; min-height: 0; border: 0; }
 
@@ -235,6 +271,19 @@ body {
   color: var(--gray);
 }
 .counter .sep { padding: 0 6px; color: var(--line-strong); }
+
+/* 序號旁極微型提示：宛如建築刊物頁碼標註 */
+.counter-hint {
+  margin-left: 10px;
+  font-family: "SFMono-Regular", Consolas, "Menlo", monospace;
+  font-size: .5625rem;         /* 9px */
+  letter-spacing: .2em;
+  color: var(--gray-light);
+}
+.hint-arrow { display: inline-block; }
+
+/* 手機微型提示：首次造訪引導點擊，互動後淡出且不再顯示 */
+.tap-hint { display: none; }
 
 /* ==========================================================================
    PROFILE
@@ -591,6 +640,22 @@ body {
   /* ---- 首頁封面：1:1 正方形 ---- */
   .slides { aspect-ratio: 1 / 1; height: auto; max-height: 80vh; contain: layout paint; }
   .slide { contain: layout paint; }
+
+  /* 觸控裝置沒有真正的懸停狀態，改用下方的 TAP TO VIEW 提示取代 */
+  .view-affordance { display: none; }
+
+  .tap-hint {
+    display: block;
+    margin-top: 12px;
+    text-align: center;
+    font-size: .5625rem;         /* 9px */
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    opacity: 1;
+    transition: opacity 700ms var(--ease);
+  }
+  .tap-hint.is-hidden { opacity: 0; }
 
   .head-meta { display: none; }
   .profile-grid { grid-template-columns: 1fr; row-gap: 48px; }
